@@ -1,0 +1,60 @@
+buildscript {
+    ext {
+        apacheCommonsCollectionsVersion = '4.4'
+        apacheCommonsLangVersion = '3.11'
+        jacksonVersion = '2.12.0'
+        kafkaVersion = '2.6.0'
+        lombokVersion = '1.18.16'
+    }
+    repositories {
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+}
+
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+}
+
+repositories {
+    mavenCentral()
+}
+
+group = 'com.splendidyeti'
+version = '1.0.0-SNAPSHOT'
+
+java {
+    withSourcesJar()
+    withJavadocJar()
+}
+
+dependencies {
+    annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+    api "org.apache.kafka:kafka-clients:${kafkaVersion}"
+    api "org.apache.kafka:kafka-streams:${kafkaVersion}"
+    api "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
+    implementation "org.apache.commons:commons-collections4:${apacheCommonsCollectionsVersion}"
+    implementation "org.apache.commons:commons-lang3:${apacheCommonsLangVersion}"
+    implementation "org.projectlombok:lombok:${lombokVersion}"
+}
+
+publishing {
+    publications {
+        kafkaClient(MavenPublication) {
+            from components.java
+        }
+    }
+    repositories {
+        maven {
+            def releasesRepoUrl = "$splendidYetiReleasesUrl"
+            def snapshotsRepoUrl = "$splendidYetiSnapshotsUrl"
+            url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+            credentials {
+                username "$splendidYetiRepoUser"
+                password "$splendidYetiRepoPassword"
+            }
+        }
+    }
+}
